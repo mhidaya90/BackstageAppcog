@@ -1,3 +1,3 @@
-
-curl -H "Authorization: Bearer rbp9uA9-UOqSJu3FUo-Zz4Obhz-5alqscNG2EoUL-z_7FSO0gH_LN5iA4PrqIolXPdSRB4NwrX3Ik6o83b1QBg" http://localhost:3000/bitrise/apps/02b66927bb082427/builds
-
+ warn Configuring proxy endpoints in the root 'proxy' configuration is deprecated. Move this configuration to 'proxy.endpoints' instead.
+[1] 2025-07-15T15:41:09.715Z proxy info [HPM] Proxy created: /bitrise  -> https://api.bitrise.io/v0.1
+[1] 2025-07-15T15:41:09.715Z proxy info [HPM] Proxy rewrite rule created: "^/bitrise" ~> ""
