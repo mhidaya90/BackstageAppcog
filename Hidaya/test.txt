@@ -13,3 +13,18 @@
     "statusCode": 401
   }
 }
+
+ const response = await fetchApi.fetch('/api/proxy/bitrise/apps/02b66927bb082427/builds',{
+          method : 'GET',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+
+
+proxy:
+  '/bitrise':
+    target: 'https://api.bitrise.io/v0.1'
+    headers:
+      Authorization: 'Bearer ${BITRISE_AUTH_TOKEN}'
+    changeOrigin: true
