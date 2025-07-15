@@ -9,7 +9,6 @@
           }
         });
 
-
 app:
   title: Scaffolded Backstage App
   baseUrl: http://localhost:3000
@@ -56,14 +55,13 @@ integrations:
     #   token: ${GHE_TOKEN}
 
 proxy:
-  endpoints:
-    '/bitrise':
-      target: 'https://api.bitrise.io/v0.1'
-      headers:
-        Authorization:$BITRISE_AUTH_TOKEN
-      changeOrigin: true
-      pathRewrite:
-        '^/bitrise' : ''
+  '/bitrise':
+    target: 'https://api.bitrise.io/v0.1'
+    headers:
+      Authorization: $BITRISE_AUTH_TOKEN
+    changeOrigin: true
+    pathRewrite:
+      '^/bitrise' : ''
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -117,4 +115,3 @@ catalog:
     #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
     #   rules:
     #     - allow: [User, Group]
-
