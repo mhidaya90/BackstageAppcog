@@ -1,0 +1,10 @@
+Request URL
+http://localhost:3000/bitrise/apps/02b66927bb082427/builds
+Request Method
+GET
+Status Code
+404 Not Found
+Remote Address
+[::1]:3000
+Referrer Policy
+strict-origin-when-cross-origin
