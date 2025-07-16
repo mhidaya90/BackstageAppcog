@@ -1,15 +1,6 @@
 
-// packages/backend/src/plugins/proxy.ts
-import { createProxyMiddleware } from 'http-proxy-middleware';
-
-app.use(
-  '/bitrise',
-  createProxyMiddleware({
-    target: 'https://api.bitrise.io/v0.1',
-    changeOrigin: true,
-    pathRewrite: { '^/bitrise': '' },
-    headers: {
-      Authorization: process.env.REACT_APP_BITRISE_AUTH_TOKEN!,
-    },
-  }),
-);
+'/test':
+    target: 'https://jsonplaceholder.typicode.com'
+    changeOrigin: true
+    pathRewrite:
+      '^/test': ''
