@@ -1,9 +1,18 @@
-const token=process.env.BITRISE_AUTH_TOKEN;
-        const response = await fetchApi.fetch('https://api.bitrise.io/v0.1/apps/02b66927bb082427/builds',{
-          method : 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `${token}`
-            //'Authorization' : 'rbp9uA9-UOqSJu3FUo-Zz4Obhz-5alqscNG2EoUL-z_7FSO0gH_LN5iA4PrqIolXPdSRB4NwrX3Ik6o83b1QBg'
-          }
-        });
+app-config.yaml:
+proxy:
+  '/bitrise':
+    target: 'https://api.bitrise.io/v0.1'
+    headers:
+      Authorization: ${REACT_APP_BITRISE_AUTH_TOKEN}
+    changeOrigin: true  
+    pathRewrite:
+      '^/bitrise': ''
+
+frontend.tsx
+ const response = await fetchApi.fetch(
+          '/bitrise/apps/02b66927bb082427/builds',{
+            method : 'GET',
+              headers: {
+                'Accept': 'application/json'
+              }
+          });
