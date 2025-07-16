@@ -1,18 +1,15 @@
-app-config.yaml:
-proxy:
-  '/bitrise':
-    target: 'https://api.bitrise.io/v0.1'
-    headers:
-      Authorization: ${REACT_APP_BITRISE_AUTH_TOKEN}
-    changeOrigin: true  
-    pathRewrite:
-      '^/bitrise': ''
 
-frontend.tsx
- const response = await fetchApi.fetch(
-          '/bitrise/apps/02b66927bb082427/builds',{
-            method : 'GET',
-              headers: {
-                'Accept': 'application/json'
-              }
-          });
+// packages/backend/src/plugins/proxy.ts
+import { createProxyMiddleware } from 'http-proxy-middleware';
+
+app.use(
+  '/bitrise',
+  createProxyMiddleware({
+    target: 'https://api.bitrise.io/v0.1',
+    changeOrigin: true,
+    pathRewrite: { '^/bitrise': '' },
+    headers: {
+      Authorization: process.env.REACT_APP_BITRISE_AUTH_TOKEN!,
+    },
+  }),
+);
