@@ -1,6 +1,12 @@
+REACT_APP_ENDPOINT=https://api.bitrise.io
 
-'/test':
-    target: 'https://jsonplaceholder.typicode.com'
-    changeOrigin: true
-    pathRewrite:
-      '^/test': ''
+
+export const config = {
+apiEndpoint: process.env.REACT_APP_ENDPOINT,
+apiToken: process.env.REACT_APP_BITRISE_AUTH_TOKEN,
+apiAppId: process.env.REACT_APP_PROJECT_ID
+}
+
+ console.log("hidaya endipoint",config.apiEndpoint);
+        const enpoint=await process.env.APP_ENDPOINT;
+        console.log("env filevread",enpoint);
