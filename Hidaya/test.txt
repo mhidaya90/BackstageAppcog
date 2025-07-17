@@ -1,12 +1,228 @@
-REACT_APP_ENDPOINT=https://api.bitrise.io
+import React, { useEffect, useState } from 'react';
+import {
+  Content,
+  Header,
+  Page,
+  Progress,
+  ResponseErrorPanel,
+} from '@backstage/core-components';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+} from '@material-ui/core';
+import { useApi, fetchApiRef, configApiRef } from '@backstage/core-plugin-api';
+import {config} from '../config';
 
+export const BitrisePage = () => {
+  const fetchApi = useApi(fetchApiRef);
+  const [builds, setBuilds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>();
 
-export const config = {
-apiEndpoint: process.env.REACT_APP_ENDPOINT,
-apiToken: process.env.REACT_APP_BITRISE_AUTH_TOKEN,
-apiAppId: process.env.REACT_APP_PROJECT_ID
-}
+  const config=useApi(configApiRef);
+  const endpoint=config.getString('custom.bitrise.endPoint');
+  console.log("env filevread",endpoint);
+  
+  useEffect(() => {
+    const fetchBuilds = async () => {
+      try {
 
- console.log("hidaya endipoint",config.apiEndpoint);
-        const enpoint=await process.env.APP_ENDPOINT;
-        console.log("env filevread",enpoint);
+        const response = await fetchApi.fetch(`${endpoint}/v0.1/apps/builds`,{
+          method : 'GET',
+          headers: {
+            'Accept': 'application/json',
+            // 'Authorization': `${config.apiToken}`
+            'Authorization' : 'rbp9uA9-UOqSJu3FUo-Zz4Obhz-5alqscNG2EoUL-z_7FSO0gH_LN5iA4PrqIolXPdSRB4NwrX3Ik6o83b1QBg'
+
+          }
+      });            
+        // const response = await fetchApi.fetch('/test/posts/1');
+        // const json = await response.json;
+        // console.log("Hidaya son",json);
+
+        // const token=process.env.REACT_APP_BITRISE_TOKEN;
+        // console.log("token from env file",token?.toString());
+        // const response = await fetchApi.fetch('https://api.bitrise.io/v0.1/apps/02b66927bb082427/builds',{
+        //   method : 'GET',
+        //   headers: {
+        //     'Accept': 'application/json',
+        //     'Authorization' : 'rbp9uA9-UOqSJu3FUo-Zz4Obhz-5alqscNG2EoUL-z_7FSO0gH_LN5iA4PrqIolXPdSRB4NwrX3Ik6o83b1QBg'
+        //   }
+        // });
+        const data = await response.json();
+        setBuilds(data.data); // Bitrise returns builds in `data.data`
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBuilds();
+  }, [fetchApi]);
+
+  if (loading) return <Progress />;
+  if (error) return <ResponseErrorPanel error={error} />;
+
+  return (
+    <Page themeId="tool">
+      <Header title="Bitrise Builds" subtitle="Latest build status from Bitrise" />
+      <Content>
+        <Grid container spacing={3}>
+          {builds.map((build: any) => (
+            <Grid item xs={12} md={6} lg={4} key={build.slug}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">
+                    Build #{build.build_number}
+                  </Typography>
+                  <Chip
+                    label={build.status_text}
+                    color={
+                      build.status === 1
+                        ? 'primary'
+                        : build.status === 2
+                        ? 'secondary'
+                        : 'default'
+                    }
+                    style={{ marginBottom: 8 }}
+                  />
+                  <Typography variant="body2">
+                    Repo: {build.repository?.repo || build.repository_url}
+                  </Typography>
+                  <Typography variant="body2">
+                    Triggered by: {build.triggered_by}
+                  </Typography>
+                  <Typography variant="body2">
+                    Commit: {build.commit_message}
+                  </Typography>
+                  <Typography variant="body2">
+                    Finished at: {build.finished_at}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Content>
+    </Page>
+  );
+
+app:
+  title: Scaffolded Backstage App
+  baseUrl: http://localhost:3000
+
+organization:
+  name: Cognizant
+
+backend:
+  # Used for enabling authentication, secret is shared by all backend plugins
+  # See https://backstage.io/docs/auth/service-to-service-auth for
+  # information on the format
+  # auth:
+  #   keys:
+  #     - secret: ${BACKEND_SECRET}
+  baseUrl: http://localhost:7007
+  permission:
+    enabled: true
+  listen:
+    port: 7007
+    # Uncomment the following host directive to bind to specific interfaces
+    # host: 127.0.0.1
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
+    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
+  cors:
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
+  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+
+integrations:
+  github:
+    - host: github.com
+      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+      # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
+      token: ${GITHUB_TOKEN}
+    ### Example for how to add your GitHub Enterprise instance using the API:
+    # - host: ghe.example.net
+    #   apiBaseUrl: https://ghe.example.net/api/v3
+    #   token: ${GHE_TOKEN}
+
+proxy:
+  endpoints:
+    '/bitrise':
+      target: 'https://api.bitrise.io/v0.1'
+      headers:
+        Authorization: ${REACT_APP_BITRISE_AUTH_TOKEN}
+      changeOrigin: true  
+      pathRewrite:
+        '^/bitrise': ''
+
+# Reference documentation http://backstage.io/docs/features/techdocs/configuration
+# Note: After experimenting with basic setup, use CI/CD to generate docs
+# and an external cloud storage when deploying TechDocs for production use-case.
+# https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
+techdocs:
+  builder: 'local' # Alternatives - 'external'
+  generator:
+    runIn: 'docker' # Alternatives - 'local'
+  publisher:
+    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
+
+auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
+  providers:
+    # See https://backstage.io/docs/auth/guest/provider
+    guest: {}
+
+scaffolder:
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location]
+  locations:
+    # Local example data, file locations are relative to the backend process, typically `packages/backend`
+    - type: file
+      target: ../../examples/entities.yaml
+
+    # Local example template
+    - type: file
+      target: ../../examples/template/template.yaml
+      rules:
+        - allow: [Template]
+
+    # Local example organizational data
+    - type: file
+      target: ../../examples/org.yaml
+      rules:
+        - allow: [User, Group]
+
+    ## Uncomment these lines to add more example data
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
+
+    ## Uncomment these lines to add an example org
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
+    #   rules:
+    #     - allow: [User, Group]
+    
+custom:
+  bitrise:
+    endPoint: ${REACT_APP_ENDPOINT}
+
+};
