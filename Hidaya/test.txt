@@ -1,20 +1,18 @@
-import { createBackendModule } from '@backstage/backend-plugin-api';
+import { createBackendPlugin } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
+import { coreServices } from '@backstage/backend-plugin-api';
 
-export const bitrisePlugin = createBackendModule({
+export const bitrisePlugin = createBackendPlugin({
   pluginId: 'bitrise',
   register(env) {
     env.registerInit({
       deps: {
-        httpRouter: coreServices.httpRouter,
         logger: coreServices.logger,
         config: coreServices.rootConfig,
+        httpRouter: coreServices.httpRouter,
       },
-      async init({ httpRouter, logger, config }) {
-        httpRouter.use(
-          '/bitrise',
-          await createRouter({ logger, config }),
-        );
+      async init({ logger, config, httpRouter }) {
+        httpRouter.use('/bitrise', await createRouter({ logger, config }));
       },
     });
   },
