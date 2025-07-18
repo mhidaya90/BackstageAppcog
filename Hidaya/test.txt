@@ -1,84 +1,45 @@
-import { MiddlewareFactory } from '@backstage/backend-defaults/rootHttpRouter';
-import { LoggerService } from '@backstage/backend-plugin-api';
-import { Config } from '@backstage/config';
-import express from 'express';
-import Router from 'express-promise-router';
+/*
+ * Hi!
+ *
+ * Note that this is an EXAMPLE Backstage backend. Please check the README.
+ *
+ * Happy hacking!
+ */
+import dotenv from 'dotenv';
+dotenv.config();
+import { createBackend } from '@backstage/backend-defaults';
 
-export interface RouterOptions {
-  logger: LoggerService;
-  config: Config;
-}
+const backend = createBackend();
 
-export async function createRouter(
-  options: RouterOptions,
-): Promise<express.Router> {
-  const { logger, config } = options;
+backend.add(import('@backstage/plugin-app-backend/alpha'));
+backend.add(import('@backstage/plugin-proxy-backend/alpha'));
+backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
+backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
 
-  const router = Router();
-  router.use(express.json());
+// auth plugin
+backend.add(import('@backstage/plugin-auth-backend'));
+// See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
+backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
+// See https://backstage.io/docs/auth/guest/provider
 
-  router.get('/health', (_, response) => {
-    logger.info('PONG!');
-    response.json({ status: 'ok' });
-  });
+// catalog plugin
+backend.add(import('@backstage/plugin-catalog-backend/alpha'));
+backend.add(
+  import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
+);
 
-  const middleware = MiddlewareFactory.create({ logger, config });
+// permission plugin
+backend.add(import('@backstage/plugin-permission-backend/alpha'));
+backend.add(
+  import('@backstage/plugin-permission-backend-module-allow-all-policy'),
+);
 
-  router.use(middleware.error());
-  return router;
-}
+// search plugin
+backend.add(import('@backstage/plugin-search-backend/alpha'));
+backend.add(import('@backstage/plugin-search-backend-module-catalog'));
+backend.add(import('@backstage/plugin-search-backend-module-techdocs/alpha'));
 
+backend.start();
 
-// import {
-//   coreServices,
-//   createBackendPlugin,
-// } from '@backstage/backend-plugin-api';
-// import { createRouter } from './router';
-
-// /**
-//  * bitriseBackPlugin backend plugin
-//  *
-//  * @public
-//  */
-// export const bitriseBackPlugin = createBackendPlugin({
-//   pluginId: 'bitrise-back',
-//   register(env) {
-//     env.registerInit({
-//       deps: {
-//         httpRouter: coreServices.httpRouter,
-//         logger: coreServices.logger,
-//         config: coreServices.rootConfig,
-//       },
-//       async init({httpRouter, logger, config,}) {
-//         httpRouter.use('/bitrise',
-//           await createRouter({logger,config}),
-//         );
-//         httpRouter.addAuthPolicy({
-//           path: '/health',
-//           allow: 'unauthenticated',
-//         });
-//       },
-//     });
-//   },
-// });
-
-
-import { createBackendPlugin } from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
-import { coreServices } from '@backstage/backend-plugin-api';
-
-export const bitrisePlugin = createBackendPlugin({
-  pluginId: 'bitrise',
-  register(env) {
-    env.registerInit({
-      deps: {
-        logger: coreServices.logger,
-        config: coreServices.rootConfig,
-        httpRouter: coreServices.httpRouter,
-      },
-      async init({ logger, config, httpRouter }) {
-        httpRouter.use('/bitrise', await createRouter(options: { logger , config }));
-      },
-    });
-  },
-});
+const toke = process.env.BITRISE_AUTH_TOKEN;
+console.log("hidaya back", toke);
