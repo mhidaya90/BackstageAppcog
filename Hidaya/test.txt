@@ -1,51 +1,21 @@
-import fetch from 'node-fetch';
+import { createBackendModule } from '@backstage/backend-plugin-api';
+import { createRouter } from './router';
 
-export class BitriseClient {
-  constructor(private readonly token: string) {}
-
-  async getBuilds(appSlug: string) {
-    const response = await fetch(`https://api.bitrise.io/v0.1/apps/${appSlug}/builds`, {
-      headers: {
-        Authorization: this.token,
-        Accept: 'application/json',
+export const bitrisePlugin = createBackendModule({
+  pluginId: 'bitrise',
+  register(env) {
+    env.registerInit({
+      deps: {
+        httpRouter: coreServices.httpRouter,
+        logger: coreServices.logger,
+        config: coreServices.rootConfig,
+      },
+      async init({ httpRouter, logger, config }) {
+        httpRouter.use(
+          '/bitrise',
+          await createRouter({ logger, config }),
+        );
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch builds: ${response.statusText}`);
-    }
-
-    return await response.json();
-  }
-}
-
-
-
-
-import { Router } from 'express';
-import { BitriseClient } from '../bitriseClient';
-
-export async function createRouter(): Promise<Router> {
-  const router = Router();
-  const client = new BitriseClient(process.env.BITRISE_AUTH_TOKEN!);
-
-  router.get('/builds/:appSlug', async (req, res) => {
-    try {
-      const builds = await client.getBuilds(req.params.appSlug);
-      res.json(builds);
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  return router;
-}
-
-
-
-
-import { bitrisePlugin } from '@internal/plugin-bitrise-backend';
-
-...
-
-apiRouter.use('/bitrise', await bitrisePlugin.createRouter());
+  },
+});
