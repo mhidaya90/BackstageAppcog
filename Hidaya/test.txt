@@ -17,3 +17,19 @@ export const bitrisePlugin = createBackendPlugin({
     });
   },
 });
+
+
+
+export async function createRouter(options: {
+  logger: LoggerService;
+  config: Config;
+}): Promise<Router> {
+  const { logger, config } = options;
+  const router = Router();
+
+  router.get('/health', (_, res) => {
+    res.json({ status: 'Bitrise plugin is healthy' });
+  });
+
+  return router;
+}
