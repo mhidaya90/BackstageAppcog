@@ -1,32 +1,6 @@
-import { MiddlewareFactory } from '@backstage/backend-defaults/rootHttpRouter';
-import { LoggerService } from '@backstage/backend-plugin-api';
-import { Config } from '@backstage/config';
-import express from 'express';
-import Router from 'express-promise-router';
-
-export interface RouterOptions {
-  logger: LoggerService;
-  config: Config;
-}
-
-export async function createRouter(
-  options: RouterOptions,
-): Promise<express.Router> {
-  const { logger, config } = options;
-
-  const router = Router();
-  router.use(express.json());
-
-  router.get('/health', (_, response) => {
-    logger.info('PONG!');
-    response.json({ status: 'ok' });
-  });
-
-  const middleware = MiddlewareFactory.create({ logger, config });
-
-  router.use(middleware.error());
-  return router;
-}
-
-
-(method) MiddlewareFactory.create(options: MiddlewareFactoryOptions): MiddlewareFactory
+Type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express/index").Router' is not assignable to type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express/index").Router'.
+  Types of property 'param' are incompatible.
+    Type '{ (name: string, handler: RequestParamHandler): IRouter; (callback: (name: string, matcher: RegExp) => RequestParamHandler): IRouter; }' is not assignable to type '(name: string, handler: RequestParamHandler) => IRouter'.
+      Types of parameters 'handler' and 'handler' are incompatible.
+        Types of parameters 'req' and 'req' are incompatible.
+          Type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").Request<import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<string, any>>' is not assignable to type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").Request<import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<...>>'.
