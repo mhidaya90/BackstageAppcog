@@ -27,3 +27,6 @@ export async function createRouter(
   router.use(middleware.error());
   return router;
 }
+
+
+(method) MiddlewareFactory.create(options: MiddlewareFactoryOptions): MiddlewareFactory
