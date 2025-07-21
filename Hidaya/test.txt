@@ -1,43 +1,39 @@
-/*
- * Hi!
- *
- * Note that this is an EXAMPLE Backstage backend. Please check the README.
- *
- * Happy hacking!
- */
-import dotenv from 'dotenv';
-dotenv.config();
-import { createBackend } from '@backstage/backend-defaults';
+import { appPlugin } from '@backstage/plugin-app-backend/alpha';
+import { proxyPlugin } from '@backstage/plugin-proxy-backend/alpha';
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder-backend/alpha';
+import { techdocsPlugin } from '@backstage/plugin-techdocs-backend/alpha';
 
-const backend = createBackend();
+import { authPlugin } from '@backstage/plugin-auth-backend';
+import { guestAuthProvider } from '@backstage/plugin-auth-backend-module-guest-provider';
 
-backend.add(import('@backstage/plugin-app-backend/alpha'));
-backend.add(import('@backstage/plugin-proxy-backend/alpha'));
-backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
-backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
+import { catalogPlugin } from '@backstage/plugin-catalog-backend/alpha';
+import { scaffolderEntityModel } from '@backstage/plugin-catalog-backend-module-scaffolder-entity-model';
 
-// auth plugin
-backend.add(import('@backstage/plugin-auth-backend'));
-// See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
-backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
-// See https://backstage.io/docs/auth/guest/provider
+import { permissionPlugin } from '@backstage/plugin-permission-backend/alpha';
+import { allowAllPolicy } from '@backstage/plugin-permission-backend-module-allow-all-policy';
 
-// catalog plugin
-backend.add(import('@backstage/plugin-catalog-backend/alpha'));
-backend.add(
-  import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
-);
+import { searchPlugin } from '@backstage/plugin-search-backend/alpha';
+import { catalogIndexModule } from '@backstage/plugin-search-backend-module-catalog';
+import { techdocsIndexModule } from '@backstage/plugin-search-backend-module-techdocs/alpha';
 
-// permission plugin
-backend.add(import('@backstage/plugin-permission-backend/alpha'));
-backend.add(
-  import('@backstage/plugin-permission-backend-module-allow-all-policy'),
-);
+import { bitrisePlugin } from '@backstage/plugin-flowsource-bitrise-backend';
 
-// search plugin
-backend.add(import('@backstage/plugin-search-backend/alpha'));
-backend.add(import('@backstage/plugin-search-backend-module-catalog'));
-backend.add(import('@backstage/plugin-search-backend-module-techdocs/alpha'));
-// backend.add(import('@internal/backstage-plugin-flowsource-bitrise-backend'));
-backend.add(import('@backstage/plugin-flowsource-bitrise-backend'));
-backend.start();
+backend.add(appPlugin);
+backend.add(proxyPlugin);
+backend.add(scaffolderPlugin);
+backend.add(techdocsPlugin);
+
+backend.add(authPlugin);
+backend.add(guestAuthProvider);
+
+backend.add(catalogPlugin);
+backend.add(scaffolderEntityModel);
+
+backend.add(permissionPlugin);
+backend.add(allowAllPolicy);
+
+backend.add(searchPlugin);
+backend.add(catalogIndexModule);
+backend.add(techdocsIndexModule);
+
+backend.add(bitrisePlugin);
