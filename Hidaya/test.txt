@@ -1,15 +1,7 @@
-import { createBackendModule } from '@backstage/backend-plugin-api';
-import { createRouter } from './service/router';
-
-export default createBackendModule({
-  pluginId: 'my-plugin',
-  register(env) {
-    env.registerInit({
-      deps: {},
-      async init() {
-        const router = await createRouter();
-        env.useRouter('/my-plugin', router);
-      },
-    });
-  },
-});
+   Some of the following packages may be outdated or have duplicate installations:
+[0]
+[0]           @backstage/backend-app-api, @backstage/plugin-auth-backend
+[0]
+[0] ⚠️   This can be resolved using the following command:
+[0]
+[0]           yarn backstage-cli versions:check --fix
