@@ -1,93 +1,22 @@
-import {
-  coreServices,
-  createBackendPlugin,
-} from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
-import { catalogServiceRef } from '@backstage/plugin-catalog-node';
-import { createTodoListService } from './services/TodoListService';
+import fetch from 'node-fetch';
 
-/**
- * flowsourceBitrisePlugin backend plugin
- *
- * @public
- */
-export const flowsourceBitrisePlugin = createBackendPlugin({
-  pluginId: 'flowsource-bitrise',
-  register(env) {
-    env.registerInit({
-      deps: {
-        logger: coreServices.logger,
-        httpAuth: coreServices.httpAuth,
-        httpRouter: coreServices.httpRouter,
-        catalog: catalogServiceRef,
+export class BitriseService {
+  constructor(private readonly apiToken: string) {}
+
+  async getBuild(appSlug: string, buildSlug: string) {
+    const response = await fetch(
+      `https://api.bitrise.io/v0.1/apps/${appSlug}/builds/${buildSlug}`,
+      {
+        headers: {
+          Authorization: `token ${this.apiToken}`,
+        },
       },
-      async init({ logger, httpAuth, httpRouter, catalog }) {
-        const todoListService = await createTodoListService({
-          logger,
-          catalog,
-        });
+    );
 
-        httpRouter.use(
-          await createRouter({
-            httpAuth,
-            todoListService,
-          }),
-        );
-      },
-    });
-  },
-});
-
-
-
-import { HttpAuthService } from '@backstage/backend-plugin-api';
-import { InputError } from '@backstage/errors';
-import { z } from 'zod';
-import express from 'express';
-import Router from 'express-promise-router';
-import { TodoListService } from './services/TodoListService/types';
-
-export async function createRouter({
-  httpAuth,
-  todoListService,
-}: {
-  httpAuth: HttpAuthService;
-  todoListService: TodoListService;
-}): Promise<express.Router> {
-  const router = Router();
-  router.use(express.json());
-
-  // TEMPLATE NOTE:
-  // Zod is a powerful library for data validation and recommended in particular
-  // for user-defined schemas. In this case we use it for input validation too.
-  //
-  // If you want to define a schema for your API we recommend using Backstage's
-  // OpenAPI tooling: https://backstage.io/docs/next/openapi/01-getting-started
-  const todoSchema = z.object({
-    title: z.string(),
-    entityRef: z.string().optional(),
-  });
-
-  router.post('/todos', async (req, res) => {
-    const parsed = todoSchema.safeParse(req.body);
-    if (!parsed.success) {
-      throw new InputError(parsed.error.toString());
+    if (!response.ok) {
+      throw new Error(`Failed to fetch build: ${response.statusText}`);
     }
 
-    const result = await todoListService.createTodo(parsed.data, {
-      credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-    });
-
-    res.status(201).json(result);
-  });
-
-  router.get('/todos', async (_req, res) => {
-    res.json(await todoListService.listTodos());
-  });
-
-  router.get('/todos/:id', async (req, res) => {
-    res.json(await todoListService.getTodo({ id: req.params.id }));
-  });
-
-  return router;
+    return await response.json();
+  }
 }
