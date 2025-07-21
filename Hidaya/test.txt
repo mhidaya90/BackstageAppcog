@@ -1,7 +1,3 @@
- Error: Invalid BackendFeature, bad type 'undefined'
-[1]     at toInternalBackendFeature (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:697:11)
-[1]     at isServiceFactory (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:711:20)
-[1]     at BackendInitializer.#addFeature (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:221:9)
-[1]     at BackendInitializer.#doStart (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:252:12)
-[1]     at async BackendInitializer.start (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:245:5)
-[1]     at async BackstageBackend.start (C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackstageBackend.ts:38:11)
+finished: /
+[1] C:\Users\Administrator\Desktop\Hidaya\node_modules\@backstage\backend-app-api\src\wiring\BackendInitializer.ts:697
+[1]     throw new Error(`Invalid BackendFeature, bad type '${feature.$$type}'`);
