@@ -1,32 +1,43 @@
-import { Router } from 'express';
+/*
+ * Hi!
+ *
+ * Note that this is an EXAMPLE Backstage backend. Please check the README.
+ *
+ * Happy hacking!
+ */
+import dotenv from 'dotenv';
+dotenv.config();
+import { createBackend } from '@backstage/backend-defaults';
 
-export async function createRouter(): Promise<Router> {
-  const router = Router();
+const backend = createBackend();
 
-  router.get('/hello', (_, res) => {
-    res.json({ message: 'Hello from my backend plugin!' });
-  });
+backend.add(import('@backstage/plugin-app-backend/alpha'));
+backend.add(import('@backstage/plugin-proxy-backend/alpha'));
+backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
+backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
 
-  return router;
-}
+// auth plugin
+backend.add(import('@backstage/plugin-auth-backend'));
+// See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
+backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
+// See https://backstage.io/docs/auth/guest/provider
 
+// catalog plugin
+backend.add(import('@backstage/plugin-catalog-backend/alpha'));
+backend.add(
+  import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
+);
 
+// permission plugin
+backend.add(import('@backstage/plugin-permission-backend/alpha'));
+backend.add(
+  import('@backstage/plugin-permission-backend-module-allow-all-policy'),
+);
 
+// search plugin
+backend.add(import('@backstage/plugin-search-backend/alpha'));
+backend.add(import('@backstage/plugin-search-backend-module-catalog'));
+backend.add(import('@backstage/plugin-search-backend-module-techdocs/alpha'));
 
-import { createRouter as myPluginRouter } from '../plugins/my-plugin/src/service/router';
-
-async function main() {
-  // ...
-  const myPlugin = await myPluginRouter();
-  apiRouter.use('/my-plugin', myPlugin);
-  // ...
-}
-
-
- ⚠️   Some of the following packages may be outdated or have duplicate installations:
-[0]
-[0]           @backstage/backend-app-api, @backstage/plugin-auth-backend
-[0]
-[0] ⚠️   This can be resolved using the following command:
-[0]
-[0]           yarn backstage-cli versions:check --fix
+backend.add(import('@internal/backstage-plugin-flowsource-bitrise-backend'));
+backend.start();
