@@ -1,6 +1,23 @@
-Type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express/index").Router' is not assignable to type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express/index").Router'.
-  Types of property 'param' are incompatible.
-    Type '{ (name: string, handler: RequestParamHandler): IRouter; (callback: (name: string, matcher: RegExp) => RequestParamHandler): IRouter; }' is not assignable to type '(name: string, handler: RequestParamHandler) => IRouter'.
-      Types of parameters 'handler' and 'handler' are incompatible.
-        Types of parameters 'req' and 'req' are incompatible.
-          Type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").Request<import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<string, any>>' is not assignable to type 'import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").Request<import("c:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<...>>'.
+import { Router } from 'express';
+
+export async function createRouter(): Promise<Router> {
+  const router = Router();
+
+  router.get('/hello', (_, res) => {
+    res.json({ message: 'Hello from my backend plugin!' });
+  });
+
+  return router;
+}
+
+
+
+
+import { createRouter as myPluginRouter } from '../plugins/my-plugin/src/service/router';
+
+async function main() {
+  // ...
+  const myPlugin = await myPluginRouter();
+  apiRouter.use('/my-plugin', myPlugin);
+  // ...
+}
