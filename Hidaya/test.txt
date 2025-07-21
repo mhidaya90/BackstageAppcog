@@ -21,3 +21,12 @@ async function main() {
   apiRouter.use('/my-plugin', myPlugin);
   // ...
 }
+
+
+ ⚠️   Some of the following packages may be outdated or have duplicate installations:
+[0]
+[0]           @backstage/backend-app-api, @backstage/plugin-auth-backend
+[0]
+[0] ⚠️   This can be resolved using the following command:
+[0]
+[0]           yarn backstage-cli versions:check --fix
