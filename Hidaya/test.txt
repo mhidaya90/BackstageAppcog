@@ -1,3 +1,16 @@
+/*
+ * Hi!
+ *
+ * Note that this is an EXAMPLE Backstage backend. Please check the README.
+ *
+ * Happy hacking!
+ */
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { createBackend } from '@backstage/backend-defaults';
+
+// Static imports for all plugins and modules
 import { appPlugin } from '@backstage/plugin-app-backend/alpha';
 import { proxyPlugin } from '@backstage/plugin-proxy-backend/alpha';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder-backend/alpha';
@@ -18,6 +31,9 @@ import { techdocsIndexModule } from '@backstage/plugin-search-backend-module-tec
 
 import { bitrisePlugin } from '@backstage/plugin-flowsource-bitrise-backend';
 
+// Create and configure the backend
+const backend = createBackend();
+
 backend.add(appPlugin);
 backend.add(proxyPlugin);
 backend.add(scaffolderPlugin);
@@ -37,3 +53,5 @@ backend.add(catalogIndexModule);
 backend.add(techdocsIndexModule);
 
 backend.add(bitrisePlugin);
+
+backend.start();
