@@ -1,45 +1,29 @@
-/*
- * Hi!
- *
- * Note that this is an EXAMPLE Backstage backend. Please check the README.
- *
- * Happy hacking!
- */
-import dotenv from 'dotenv';
-dotenv.config();
-import { createBackend } from '@backstage/backend-defaults';
+import { MiddlewareFactory } from '@backstage/backend-defaults/rootHttpRouter';
+import { LoggerService } from '@backstage/backend-plugin-api';
+import { Config } from '@backstage/config';
+import express from 'express';
+import Router from 'express-promise-router';
 
-const backend = createBackend();
+export interface RouterOptions {
+  logger: LoggerService;
+  config: Config;
+}
 
-backend.add(import('@backstage/plugin-app-backend/alpha'));
-backend.add(import('@backstage/plugin-proxy-backend/alpha'));
-backend.add(import('@backstage/plugin-scaffolder-backend/alpha'));
-backend.add(import('@backstage/plugin-techdocs-backend/alpha'));
+export async function createRouter(
+  options: RouterOptions,
+): Promise<express.Router> {
+  const { logger, config } = options;
 
-// auth plugin
-backend.add(import('@backstage/plugin-auth-backend'));
-// See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
-backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
-// See https://backstage.io/docs/auth/guest/provider
+  const router = Router();
+  router.use(express.json());
 
-// catalog plugin
-backend.add(import('@backstage/plugin-catalog-backend/alpha'));
-backend.add(
-  import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
-);
+  router.get('/health', (_, response) => {
+    logger.info('PONG!');
+    response.json({ status: 'ok' });
+  });
 
-// permission plugin
-backend.add(import('@backstage/plugin-permission-backend/alpha'));
-backend.add(
-  import('@backstage/plugin-permission-backend-module-allow-all-policy'),
-);
+  const middleware = MiddlewareFactory.create({ logger, config });
 
-// search plugin
-backend.add(import('@backstage/plugin-search-backend/alpha'));
-backend.add(import('@backstage/plugin-search-backend-module-catalog'));
-backend.add(import('@backstage/plugin-search-backend-module-techdocs/alpha'));
-
-backend.start();
-
-const toke = process.env.BITRISE_AUTH_TOKEN;
-console.log("hidaya back", toke);
+  router.use(middleware.error());
+  return router;
+}
