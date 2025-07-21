@@ -1,7 +1,37 @@
-   Some of the following packages may be outdated or have duplicate installations:
-[0]
-[0]           @backstage/backend-app-api, @backstage/plugin-auth-backend
-[0]
-[0] ⚠️   This can be resolved using the following command:
-[0]
-[0]           yarn backstage-cli versions:check --fix
+
+plugins/bitrise/src/components/BitrisePage.tsx:16:31 - error TS6133: 'configApiRef' is declared but its value is never read.
+
+16 import { useApi, fetchApiRef, configApiRef } from '@backstage/core-plugin-api';
+                                 ~~~~~~~~~~~~
+
+plugins/flowsource-bitrise-backend/src/plugin.ts:27:11 - error TS2345: Argument of type 'Router' is not assignable to parameter of type 'Handler'.
+  Types of parameters 'req' and 'req' are incompatible.
+    Type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").Request<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<string, any>>' is not assignable to type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").Request<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<...>>'.
+
+27           await createRouter({
+             ~~~~~~~~~~~~~~~~~~~~
+28             logger,
+   ~~~~~~~~~~~~~~~~~~~
+29             config,
+   ~~~~~~~~~~~~~~~~~~~
+30           }),
+   ~~~~~~~~~~~~
+
+plugins/flowsource-bitrise-backend/src/service/router.ts:28:3 - error TS2322: Type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express/index").Router' is not assignable to type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express/index").Router'.
+  Types of property 'param' are incompatible.
+    Type '{ (name: string, handler: RequestParamHandler): IRouter; (callback: (name: string, matcher: RegExp) => RequestParamHandler): IRouter; }' is not assignable to type '(name: string, handler: RequestParamHandler) => IRouter'.
+      Types of parameters 'handler' and 'handler' are incompatible.
+        Types of parameters 'req' and 'req' are incompatible.
+          Type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").Request<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<string, any>>' is not assignable to type 'import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").Request<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs.ParsedQs, Record<...>>'.
+            The types of 'app.get' are incompatible between these types.
+              Type '((name: string) => any) & import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").IRouterMatcher<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/express-serve-static-core/index").Application<Record<string, any>>, any>' is not assignable to type '((name: string) => any) & import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").IRouterMatcher<import("C:/Users/Administrator/Desktop/Hidaya/node_modules/@types/passport/node_modules/@types/express-serve-static-core/index").Application<Record...'.
+                Type '((name: string) => any) & IRouterMatcher<Application<Record<string, any>>, any>' is not assignable to type 'IRouterMatcher<Application<Record<string, any>>, any>'.
+                  Types of parameters 'name' and 'path' are incompatible.
+                    Type 'PathParams' is not assignable to type 'string'.
+                      Type 'RegExp' is not assignable to type 'string'.
+
+28   return router;
+     ~~~~~~
+
+
+Found 3 errors in 3 files.
