@@ -1,24 +1,45 @@
-import fetch from 'node-fetch';
-import { BitriseServiceType } from './types';
+import {{
+  coreServices,
+  createBackendPlugin,
+}} from '@backstage/backend-plugin-api';
+import {{ createRouter }} from './router';
+import {{ catalogServiceRef }} from '@backstage/plugin-catalog-node';
+import {{ createTodoListService }} from './services/TodoListService';
+import {{ bitriseService }} from './services/BitriseService';
 
+/**
+ * flowsourceBitrisePlugin backend plugin
+ *
+ * @public
+ */
+export const flowsourceBitrisePlugin = createBackendPlugin({{
+  pluginId: 'flowsource-bitrise',
+  register(env) {{
+    env.registerInit({{
+      deps: {{
+        logger: coreServices.logger,
+        httpAuth: coreServices.httpAuth,
+        httpRouter: coreServices.httpRouter,
+        catalog: catalogServiceRef,
+      }},
+      async init({{ logger, httpAuth, httpRouter, catalog }}) {{
+        const todoListService = await createTodoListService({{
+          logger,
+          catalog,
+        }});
 
-export class bitriseService implements BitriseServiceType {
-  constructor(public apiToken: string) {}
+        const bitriseServiceInstance = new bitriseService(
+          process.env.BITRISE_API_TOKEN!,
+        );
 
-  async getBuild(appSlug: string):Promise<any> {
-    const response = await fetch(
-      `https://api.bitrise.io/v0.1/apps/${appSlug}/builds`,
-      {
-        headers: {
-          Authorization: `token ${this.apiToken}`,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch build: ${response.statusText}`);
-    }
-
-    return await response.json();
-  }
-}
+        httpRouter.use(
+          await createRouter({{
+            httpAuth,
+            todoListService,
+            bitriseService: bitriseServiceInstance,
+          }}),
+        );
+      }},
+    }});
+  }},
+}});
