@@ -1,24 +1,22 @@
+import {
+  createPlugin,
+  createRoutableExtension,
+} from '@backstage/core-plugin-api';
 
-useEffect(() => {
-    const fetchBuilds = async () => {
-      try {
-        const baseUrl = await discoveryApi.getBaseUrl('bitrise');
-        const response = await fetch(`${baseUrl}/builds`);
-        const data = await response.json();
-        setBuilds(data.data);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setLoading(false);
-      }
-    };
+import { rootRouteRef } from './routes';
 
-    fetchBuilds();
-  }, [discoveryApi]);
+export const flowsourceBitriseFrontendPlugin = createPlugin({
+  id: 'flowsource-bitrise-frontend',
+  routes: {
+    root: rootRouteRef,
+  },
+});
 
-
- router.get('/bitrise/build/:appSlug', async (req, res) => {
-    const { appSlug } = req.params;
-    const build = await bitriseService.getBuild(appSlug);
-    res.json(build);
-  });
+export const FlowsourceBitriseFrontendPage = flowsourceBitriseFrontendPlugin.provide(
+  createRoutableExtension({
+    name: 'FlowsourceBitriseFrontendPage',
+    component: () =>
+      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+    mountPoint: rootRouteRef,
+  }),
+);
