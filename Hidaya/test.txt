@@ -1,54 +1,12 @@
-import {{ HttpAuthService }} from '@backstage/backend-plugin-api';
-import {{ InputError }} from '@backstage/errors';
-import {{ z }} from 'zod';
-import express from 'express';
-import Router from 'express-promise-router';
-import {{ TodoListService }} from './services/TodoListService/types';
-import {{ BitriseServiceType }} from './services/BitriseService/types';
-
-export async function createRouter({{
-  httpAuth,
-  todoListService,
-  bitriseService,
-}}: {{
-  httpAuth: HttpAuthService;
-  todoListService: TodoListService;
-  bitriseService: BitriseServiceType;
-}}): Promise<express.Router> {{
-  const router = Router();
-  router.use(express.json());
-
-  const todoSchema = z.object({{
-    title: z.string(),
-    entityRef: z.string().optional(),
-  }});
-
-  router.post('/todos', async (req, res) => {{
-    const parsed = todoSchema.safeParse(req.body);
-    if (!parsed.success) {{
-      throw new InputError(parsed.error.toString());
-    }}
-
-    const result = await todoListService.createTodo(parsed.data, {{
-      credentials: await httpAuth.credentials(req, {{ allow: ['user'] }}),
-    }});
-
-    res.status(201).json(result);
-  }});
-
-  router.get('/todos', async (_req, res) => {{
-    res.json(await todoListService.listTodos());
-  }});
-
-  router.get('/todos/:id', async (req, res) => {{
-    res.json(await todoListService.getTodo({{ id: req.params.id }}));
-  }});
-
-  router.get('/bitrise/build/:appSlug', async (req, res) => {{
-    const {{ appSlug }} = req.params;
-    const build = await bitriseService.getBuild(appSlug);
-    res.json(build);
-  }});
-
-  return router;
-}}
+"error": {
+    "name": "AuthenticationError",
+    "message": "Missing credentials",
+    "stack": "AuthenticationError: Missing credentials\n    at DefaultHttpAuthService.credentials (C:\\Users\\Administrator\\Desktop\\tesNew\\node_modules\\@backstage\\backend-defaults\\src\\entrypoints\\httpAuth\\httpAuthServiceFactory.ts:179:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+  },
+  "request": {
+    "method": "GET",
+    "url": "/bitrise/build/f5d679ef-cf31-4df4-b9e1-b9f8405ec2e8"
+  },
+  "response": {
+    "statusCode": 401
+  }
