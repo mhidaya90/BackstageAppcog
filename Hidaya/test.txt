@@ -1,21 +1,20 @@
-import { Router } from 'express';
-import { PluginEnvironment } from '../types';
-import { bitriseService } from './service';
+import express from 'express';
+import Router from 'express-promise-router';
+import { BitriseServiceType } from './services/BitriseService/types';
 
-export async function createRouter(env: PluginEnvironment): Promise<Router> {
+export async function createRouter({
+bitriseService,
+}: {
+  bitriseService: BitriseServiceType;
+}): Promise<express.Router> {
   const router = Router();
-
-  router.get('/builds/:appSlug', async (req, res) => {
+  router.use(express.json());
+  router.get('/bitrise/build/:appSlug', async (req, res) => {
     const { appSlug } = req.params;
-    const service = new bitriseService('your-api-token');
-    try {
-      const builds = await service.getBuild(appSlug);
-      res.json(builds);
-    } catch (e) {
-      env.logger.error(e);
-      res.status(500).json({ error: e.message });
-    }
+    const build = await bitriseService.getBuild(appSlug);
+    res.json(build);
   });
 
   return router;
 }
+
