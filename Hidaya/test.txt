@@ -1,4 +1,109 @@
-Type '() => JSX.Element' is not assignable to type 'Element'.ts(2322)
-EntityPage.tsx(227, 8): Did you mean to call this expression?
-(alias) const BitriseComponent: () => JSX.Element
-import BitriseComponent
+
+import {
+  coreServices,
+  createBackendPlugin,
+} from '@backstage/backend-plugin-api';
+import { createRouter } from './router';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { bitriseService } from './services/BitriseService';
+
+/**
+ * flowsourceBitrisePlugin backend plugin
+ *
+ * @public
+ */
+export const flowsourceBitrisePlugin = createBackendPlugin({
+  pluginId: 'flowsource-bitrise',
+  register(env) {
+    env.registerInit({
+      deps: {
+        logger: coreServices.logger,
+        //httpAuth: coreServices.httpAuth,
+        httpRouter: coreServices.httpRouter,
+        catalog: catalogServiceRef,
+      },
+      async init({ httpRouter }) {
+        // const todoListService = await createTodoListService({
+        //   logger,
+        //   catalog,
+        // });
+
+        const bitriseServiceInstance = new bitriseService(
+          process.env.BITRISE_AUTH_TOKEN!,
+        );
+
+        httpRouter.use(
+          await createRouter({
+            //httpAuth,
+            //todoListService,
+            bitriseService: bitriseServiceInstance,
+          }),
+        );
+      },
+    });
+  },
+});
+
+
+
+import express from 'express';
+import Router from 'express-promise-router';
+// import { TodoListService } from './services/TodoListService/types';
+import { BitriseServiceType } from './services/BitriseService/types';
+// import { HttpAuthService, BackstageCredentials } from '@backstage/backend-plugin-api';
+
+export async function createRouter({
+  //httpAuth,
+  //todoListService,
+  bitriseService,
+}: {
+  //httpAuth: HttpAuthService;
+  //todoListService: TodoListService;
+  bitriseService: BitriseServiceType;
+}): Promise<express.Router> {
+  const router = Router();
+  router.use(express.json());
+
+  // const todoSchema = z.object({
+  //   title: z.string(),
+  //   entityRef: z.string().optional(),
+  // });
+
+  // router.post('/todos', async (req, res) => {
+  //   const parsed = todoSchema.safeParse(req.body);
+  //   if (!parsed.success) {
+  //     throw new InputError(parsed.error.toString());
+  //   }
+
+  //   const mockCredentials: BackstageCredentials<any> = {
+  //     principal: {
+  //       ownershipEntityRefs: ['user:default/local-test-user'],
+  //       userEntityRef: 'user:default/local-test-user',
+  //     },
+  //     $$type: '@backstage/BackstageCredentials'
+  //   };
+  //   const result = await todoListService.createTodo(parsed.data, {
+  //     //credentials: await httpAuth.credentials(req, { allow: ['user'] }),
+  //     credentials: mockCredentials,
+  //   });
+
+  //   res.status(201).json(result);
+  // });
+
+  // router.get('/todos', async (_req, res) => {
+  //   res.json(await todoListService.listTodos());
+  // });
+
+  // router.get('/todos/:id', async (req, res) => {
+  //   res.json(await todoListService.getTodo({ id: req.params.id }));
+  // });
+
+  router.get('/bitrise/build/:appSlug', async (req, res) => {
+    const { appSlug } = req.params;
+    const build = await bitriseService.getBuild(appSlug);
+    res.json(build);
+  });
+
+  return router;
+}
+
