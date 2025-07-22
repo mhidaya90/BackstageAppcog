@@ -69,3 +69,9 @@ export async function createRouter({
 
   return router;
 }
+
+
+
+Object literal may only specify known properties, and 'token' does not exist in type 'BackstageCredentials<BackstageUserPrincipal>'.ts(2353)
+types.ts(20, 7): The expected type comes from property 'credentials' which is declared here on type '{ credentials: BackstageCredentials<BackstageUserPrincipal>; }'
+(property) token: string
