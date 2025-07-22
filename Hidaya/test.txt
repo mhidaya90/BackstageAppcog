@@ -1,3 +1,6 @@
-Type 'typeof bitriseService' is missing the following properties from type 'bitriseService': apiToken, getBuildts(2739)
-router.ts(16, 3): The expected type comes from property 'bitriseService' which is declared here on type '{ httpAuth: HttpAuthService; todoListService: TodoListService; bitriseService: bitriseService; }'
-(property) bitriseService: bitriseService
+
+export interface BitriseService {
+  apiToken: string;
+  getBuilds(appSlug: string): Promise<any>; // Adjust return type as needed
+  triggerBuild(appSlug: string, workflowId: string): Promise<any>; // Optional
+}
