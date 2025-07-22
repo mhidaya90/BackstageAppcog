@@ -1,13 +1,11 @@
 import fetch from 'node-fetch';
+import { BitriseServiceType } from './types';
 
-export interface BitriseServiceType {
-  getBuild(appSlug: string): Promise<any>;
-}
 
-export class BitriseService implements BitriseServiceType {
+export class bitriseService implements BitriseServiceType {
   constructor(public apiToken: string) {}
 
-  async getBuild(appSlug: string): Promise<any> {
+  async getBuild(appSlug: string):Promise<any> {
     const response = await fetch(
       `https://api.bitrise.io/v0.1/apps/${appSlug}/builds`,
       {
@@ -23,111 +21,4 @@ export class BitriseService implements BitriseServiceType {
 
     return await response.json();
   }
-}
-
-
-
-
-import {
-  coreServices,
-  createBackendPlugin,
-} from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
-import { catalogServiceRef } from '@backstage/plugin-catalog-node';
-import { createTodoListService } from './services/TodoListService';
-import { BitriseService } from './services/BitriseService';
-
-/**
- * flowsourceBitrisePlugin backend plugin
- *
- * @public
- */
-export const flowsourceBitrisePlugin = createBackendPlugin({
-  pluginId: 'flowsource-bitrise',
-  register(env) {
-    env.registerInit({
-      deps: {
-        logger: coreServices.logger,
-        httpAuth: coreServices.httpAuth,
-        httpRouter: coreServices.httpRouter,
-        catalog: catalogServiceRef,
-      },
-      async init({ logger, httpAuth, httpRouter, catalog }) {
-        const todoListService = await createTodoListService({
-          logger,
-          catalog,
-        });
-
-        const bitriseService = new BitriseService(
-          process.env.BITRISE_API_TOKEN!,
-        );
-
-        httpRouter.use(
-          await createRouter({
-            httpAuth,
-            todoListService,
-            bitriseService,
-          }),
-        );
-      },
-    });
-  },
-});
-
-
-
-
-import { HttpAuthService } from '@backstage/backend-plugin-api';
-import { InputError } from '@backstage/errors';
-import { z } from 'zod';
-import express from 'express';
-import Router from 'express-promise-router';
-import { TodoListService } from './services/TodoListService/types';
-import { BitriseServiceType } from './services/BitriseService';
-
-export async function createRouter({
-  httpAuth,
-  todoListService,
-  bitriseService,
-}: {
-  httpAuth: HttpAuthService;
-  todoListService: TodoListService;
-  bitriseService: BitriseServiceType;
-}): Promise<express.Router> {
-  const router = Router();
-  router.use(express.json());
-
-  const todoSchema = z.object({
-    title: z.string(),
-    entityRef: z.string().optional(),
-  });
-
-  router.post('/todos', async (req, res) => {
-    const parsed = todoSchema.safeParse(req.body);
-    if (!parsed.success) {
-      throw new InputError(parsed.error.toString());
-    }
-
-    const result = await todoListService.createTodo(parsed.data, {
-      credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-    });
-
-    res.status(201).json(result);
-  });
-
-  router.get('/todos', async (_req, res) => {
-    res.json(await todoListService.listTodos());
-  });
-
-  router.get('/todos/:id', async (req, res) => {
-    res.json(await todoListService.getTodo({ id: req.params.id }));
-  });
-
-  router.get('/bitrise/build/:appSlug', async (req, res) => {
-    const { appSlug } = req.params;
-    const build = await bitriseService.getBuild(appSlug);
-    res.json(build);
-  });
-
-  return router;
 }
