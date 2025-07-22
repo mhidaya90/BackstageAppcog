@@ -1,20 +1,37 @@
-import express from 'express';
-import Router from 'express-promise-router';
-import { BitriseServiceType } from './services/BitriseService/types';
+import {
+  coreServices,
+  createBackendPlugin,
+} from '@backstage/backend-plugin-api';
+import { createRouter } from './router';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { bitriseService } from './services/BitriseService';
 
-export async function createRouter({
-bitriseService,
-}: {
-  bitriseService: BitriseServiceType;
-}): Promise<express.Router> {
-  const router = Router();
-  router.use(express.json());
-  router.get('/bitrise/build/:appSlug', async (req, res) => {
-    const { appSlug } = req.params;
-    const build = await bitriseService.getBuild(appSlug);
-    res.json(build);
-  });
+/**
+ * flowsourceBitrisePlugin backend plugin
+ *
+ * @public
+ */
+export const flowsourceBitrisePlugin = createBackendPlugin({
+  pluginId: 'flowsource-bitrise',
+  register(env) {
+    env.registerInit({
+      deps: {
+        logger: coreServices.logger,
+        httpRouter: coreServices.httpRouter,
+        catalog: catalogServiceRef,
+      },
+      async init({ httpRouter }) {
+        console.log("hidaya token is ==============================>",process.env.BITRISE_AUTH_TOKEN);
+        const bitriseServiceInstance = new bitriseService(
+          process.env.BITRISE_AUTH_TOKEN!,
+        );
 
-  return router;
-}
-
+        httpRouter.use(
+          await createRouter({
+            bitriseService: bitriseServiceInstance,
+          }),
+        );
+      },
+    });
+  },
+});
