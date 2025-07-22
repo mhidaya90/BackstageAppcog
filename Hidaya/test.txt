@@ -15,3 +15,10 @@ useEffect(() => {
 
     fetchBuilds();
   }, [discoveryApi]);
+
+
+ router.get('/bitrise/build/:appSlug', async (req, res) => {
+    const { appSlug } = req.params;
+    const build = await bitriseService.getBuild(appSlug);
+    res.json(build);
+  });
