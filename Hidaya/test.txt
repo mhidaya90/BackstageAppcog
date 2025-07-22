@@ -1,14 +1,9 @@
-{
-    "error": {
-        "name": "AuthenticationError",
-        "message": "Missing credentials",
-        "stack": "AuthenticationError: Missing credentials\n    at DefaultHttpAuthService.credentials (C:\\Users\\Administrator\\Desktop\\tesNew\\node_modules\\@backstage\\backend-defaults\\src\\entrypoints\\httpAuth\\httpAuthServiceFactory.ts:179:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
-    },
-    "request": {
-        "method": "GET",
-        "url": "/bitrise/build/f5d679ef-cf31-4df4-b9e1-b9f8405ec2e8"
-    },
-    "response": {
-        "statusCode": 401
-    }
-}
+
+const fetchBuildDetails = async (buildId: string) => {
+  const fetchApi = useApi(fetchApiRef);
+  const response = await fetchApi.fetch(`/api/bitrise/build/${buildId}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch build: ${response.statusText}`);
+  }
+  return await response.json();
+};
