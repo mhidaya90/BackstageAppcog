@@ -1,19 +1,3 @@
-"error": {
-    "name": "AuthenticationError",
-    "message": "Missing credentials",
-    "stack": "AuthenticationError: Missing credentials\n    at DefaultHttpAuthService.credentials (C:\\Users\\Administrator\\Desktop\\tesNew\\node_modules\\@backstage\\backend-defaults\\src\\entrypoints\\httpAuth\\httpAuthServiceFactory.ts:179:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
-  },
-  "request": {
-    "method": "GET",
-    "url": "/bitrise/build/f5d679ef-cf31-4df4-b9e1-b9f8405ec2e8"
-  },
-  "response": {
-    "statusCode": 401
-  }
-
-
-
-
 import { HttpAuthService } from '@backstage/backend-plugin-api';
 import { InputError } from '@backstage/errors';
 import { z } from 'zod';
@@ -21,6 +5,7 @@ import express from 'express';
 import Router from 'express-promise-router';
 import { TodoListService } from './services/TodoListService/types';
 import { BitriseServiceType } from './services/BitriseService/types';
+import { BackstageCredentials, BackstageUserPrincipal } from '@backstage/backend-plugin-api';
 
 export async function createRouter({
   httpAuth,
@@ -45,9 +30,17 @@ export async function createRouter({
       throw new InputError(parsed.error.toString());
     }
 
-    // Removed httpAuth.credentials for local testing
+    const mockCredentials: BackstageCredentials<BackstageUserPrincipal> = {
+      principal: {
+        type: 'user',
+        user: {
+          entityRef: 'user:default/local-test-user',
+        },
+      },
+    };
+
     const result = await todoListService.createTodo(parsed.data, {
-      credentials: { token: 'local-test-user' },
+      credentials: mockCredentials,
     });
 
     res.status(201).json(result);
@@ -69,9 +62,3 @@ export async function createRouter({
 
   return router;
 }
-
-
-
-Object literal may only specify known properties, and 'token' does not exist in type 'BackstageCredentials<BackstageUserPrincipal>'.ts(2353)
-types.ts(20, 7): The expected type comes from property 'credentials' which is declared here on type '{ credentials: BackstageCredentials<BackstageUserPrincipal>; }'
-(property) token: string
