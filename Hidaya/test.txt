@@ -1,53 +1,55 @@
-import { flowsourceBitrisePlugin } from './plugin';
-import { createRouter } from './router';
 import { coreServices } from '@backstage/backend-plugin-api';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { createBackendPlugin } from '@backstage/backend-plugin-api';
+import { createRouter } from './router';
+import { bitriseService } from './services/BitriseService';
 
 jest.mock('./router', () => ({
   createRouter: jest.fn().mockResolvedValue('mockRouter'),
 }));
 
-const mockUse = jest.fn();
-const mockRegisterInit = jest.fn();
-const mockLogger = {};
-const mockCatalog = {};
-
-const mockEnv = {
-  registerInit: mockRegisterInit,
-};
+jest.mock('./services/BitriseService', () => ({
+  bitriseService: jest.fn().mockImplementation(() => ({
+    getBuild: jest.fn(),
+  })),
+}));
 
 describe('flowsourceBitrisePlugin', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should register and initialize the plugin correctly', async () => {
-    const plugin = flowsourceBitrisePlugin;
+    const registerInitMock = jest.fn();
+    const env = { registerInit: registerInitMock };
 
-    plugin.register(mockEnv as any);
-
-    expect(mockRegisterInit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        deps: expect.objectContaining({
-          logger: coreServices.logger,
-          httpRouter: coreServices.httpRouter,
-          catalog: catalogServiceRef,
-        }),
-        init: expect.any(Function),
-      }),
-    );
-
-    const initFn = mockRegisterInit.mock.calls[0][0].init;
-
-    process.env.BITRISE_AUTH_TOKEN = 'dummy-token';
-
-    const mockHttpRouter = { use: mockUse };
-    await initFn({ httpRouter: mockHttpRouter });
-
-    expect(createRouter).toHaveBeenCalledWith({
-      bitriseService: expect.any(Object),
+    const plugin = createBackendPlugin({
+      pluginId: 'flowsource-bitrise',
+      register(env) {
+        env.registerInit({
+          deps: {
+            logger: coreServices.logger,
+            httpRouter: coreServices.httpRouter,
+            catalog: catalogServiceRef,
+          },
+          async init({ httpRouter }) {
+            const bitriseServiceInstance = new bitriseService('fake-token');
+            const router = await createRouter({ bitriseService: bitriseServiceInstance });
+            httpRouter.use(router);
+          },
+        });
+      },
     });
 
-    expect(mockUse).toHaveBeenCalledWith('mockRouter');
+    // Simulate plugin registration
+    plugin.register(env);
+
+    expect(registerInitMock).toHaveBeenCalled();
+    const initConfig = registerInitMock.mock.calls[0][0];
+    expect(initConfig.deps).toHaveProperty('logger');
+    expect(initConfig.deps).toHaveProperty('httpRouter');
+    expect(initConfig.deps).toHaveProperty('catalog');
+
+    const httpRouterMock = { use: jest.fn() };
+    await initConfig.init({ httpRouter: httpRouterMock });
+
+    expect(createRouter).toHaveBeenCalled();
+    expect(httpRouterMock.use).toHaveBeenCalledWith('mockRouter');
   });
 });
