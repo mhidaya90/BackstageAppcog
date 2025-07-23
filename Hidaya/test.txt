@@ -1,44 +1,23 @@
-import { flowsourceBitrisePlugin } from './plugin';
-import { coreServices } from '@backstage/backend-plugin-api';
-import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import express from 'express';
+import request from 'supertest';
 import { createRouter } from './router';
-import { bitriseService } from './services/BitriseService';
 
-jest.mock('./router', () => ({
-  createRouter: jest.fn().mockResolvedValue('mockRouter'),
-}));
+describe('Router', () => {
+  let app: express.Express;
+  const mockBitriseService = {
+    getBuild: jest.fn().mockResolvedValue({ id: '123', status: 'success' }),
+  };
 
-jest.mock('./services/BitriseService', () => ({
-  bitriseService: jest.fn().mockImplementation(() => ({
-    getBuild: jest.fn(),
-  })),
-}));
+  beforeAll(async () => {
+    app = express();
+    const router = await createRouter({ bitriseService: mockBitriseService });
+    app.use(router);
+  });
 
-describe('flowsourceBitrisePlugin', () => {
-  it('should register and initialize the plugin correctly', async () => {
-    const registerInitMock = jest.fn();
-
-    const env = {
-      registerInit: registerInitMock,
-    };
-
-    // Invoke the plugin function to simulate registration
-    flowsourceBitrisePlugin.register(env);
-
-    expect(registerInitMock).toHaveBeenCalled();
-
-    const initConfig = registerInitMock.mock.calls[0][0];
-    expect(initConfig.deps).toHaveProperty('logger');
-    expect(initConfig.deps).toHaveProperty('httpRouter');
-    expect(initConfig.deps).toHaveProperty('catalog');
-
-    const mockHttpRouter = {
-      use: jest.fn(),
-    };
-
-    await initConfig.init({ httpRouter: mockHttpRouter });
-
-    expect(createRouter).toHaveBeenCalled();
-    expect(mockHttpRouter.use).toHaveBeenCalledWith('mockRouter');
+  it('GET /bitrise/build/:appSlug should return build info', async () => {
+    const response = await request(app).get('/bitrise/build/test-app');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ id: '123', status: 'success' });
+    expect(mockBitriseService.getBuild).toHaveBeenCalledWith('test-app');
   });
 });
