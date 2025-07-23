@@ -1,25 +1,53 @@
-import request from 'supertest';
-import express from 'express';
-import { createRouter } from './router'; // Adjust the path if needed
+import { flowsourceBitrisePlugin } from './plugin';
+import { createRouter } from './router';
+import { coreServices } from '@backstage/backend-plugin-api';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 
-describe('Router', () => {
-  let app;
-  let mockBitriseService;
+jest.mock('./router', () => ({
+  createRouter: jest.fn().mockResolvedValue('mockRouter'),
+}));
 
-  beforeEach(async () => {
-    mockBitriseService = {
-      getBuild: jest.fn().mockResolvedValue({ id: '123', status: 'success' }),
-    };
+const mockUse = jest.fn();
+const mockRegisterInit = jest.fn();
+const mockLogger = {};
+const mockCatalog = {};
 
-    const router = await createRouter({ bitriseService: mockBitriseService });
-    app = express();
-    app.use(router);
+const mockEnv = {
+  registerInit: mockRegisterInit,
+};
+
+describe('flowsourceBitrisePlugin', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('GET /bitrise/build/:appSlug should return build info', async () => {
-    const response = await request(app).get('/bitrise/build/testAppSlug');
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ id: '123', status: 'success' });
-    expect(mockBitriseService.getBuild).toHaveBeenCalledWith('testAppSlug');
+  it('should register and initialize the plugin correctly', async () => {
+    const plugin = flowsourceBitrisePlugin;
+
+    plugin.register(mockEnv as any);
+
+    expect(mockRegisterInit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deps: expect.objectContaining({
+          logger: coreServices.logger,
+          httpRouter: coreServices.httpRouter,
+          catalog: catalogServiceRef,
+        }),
+        init: expect.any(Function),
+      }),
+    );
+
+    const initFn = mockRegisterInit.mock.calls[0][0].init;
+
+    process.env.BITRISE_AUTH_TOKEN = 'dummy-token';
+
+    const mockHttpRouter = { use: mockUse };
+    await initFn({ httpRouter: mockHttpRouter });
+
+    expect(createRouter).toHaveBeenCalledWith({
+      bitriseService: expect.any(Object),
+    });
+
+    expect(mockUse).toHaveBeenCalledWith('mockRouter');
   });
 });
