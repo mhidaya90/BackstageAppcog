@@ -1,55 +1,26 @@
-import { coreServices } from '@backstage/backend-plugin-api';
-import { catalogServiceRef } from '@backstage/plugin-catalog-node';
-import { createBackendPlugin } from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
-import { bitriseService } from './services/BitriseService';
 
-jest.mock('./router', () => ({
-  createRouter: jest.fn().mockResolvedValue('mockRouter'),
-}));
+ FAIL   @backstage/plugin-flowsource-bitrise-backend  plugins/flowsource-bitrise-backend/src/plugin.test.ts
+  ● flowsourceBitrisePlugin › should register and initialize the plugin correctly
 
-jest.mock('./services/BitriseService', () => ({
-  bitriseService: jest.fn().mockImplementation(() => ({
-    getBuild: jest.fn(),
-  })),
-}));
+    expect(jest.fn()).toHaveBeenCalled()
 
-describe('flowsourceBitrisePlugin', () => {
-  it('should register and initialize the plugin correctly', async () => {
-    const registerInitMock = jest.fn();
-    const env = { registerInit: registerInitMock };
+    Expected number of calls: >= 1
+    Received number of calls:    0
 
-    const plugin = createBackendPlugin({
-      pluginId: 'flowsource-bitrise',
-      register(env) {
-        env.registerInit({
-          deps: {
-            logger: coreServices.logger,
-            httpRouter: coreServices.httpRouter,
-            catalog: catalogServiceRef,
-          },
-          async init({ httpRouter }) {
-            const bitriseServiceInstance = new bitriseService('fake-token');
-            const router = await createRouter({ bitriseService: bitriseServiceInstance });
-            httpRouter.use(router);
-          },
-        });
-      },
-    });
+      41 |     //plugin.register(env);
+      42 |
+    > 43 |     expect(registerInitMock).toHaveBeenCalled();
+         |                              ^
+      44 |     const initConfig = registerInitMock.mock.calls[0][0];
+      45 |     expect(initConfig.deps).toHaveProperty('logger');
+      46 |     expect(initConfig.deps).toHaveProperty('httpRouter');
 
-    // Simulate plugin registration
-    plugin.register(env);
+      at Object.toHaveBeenCalled (plugin.test.ts:43:30)
 
-    expect(registerInitMock).toHaveBeenCalled();
-    const initConfig = registerInitMock.mock.calls[0][0];
-    expect(initConfig.deps).toHaveProperty('logger');
-    expect(initConfig.deps).toHaveProperty('httpRouter');
-    expect(initConfig.deps).toHaveProperty('catalog');
+ FAIL   @backstage/plugin-flowsource-bitrise-backend  plugins/flowsource-bitrise-backend/src/router.test.ts
+  ● Router › GET /bitrise/build/:appSlug should return build info
 
-    const httpRouterMock = { use: jest.fn() };
-    await initConfig.init({ httpRouter: httpRouterMock });
+    expect(received).toBe(expected) // Object.is equality
 
-    expect(createRouter).toHaveBeenCalled();
-    expect(httpRouterMock.use).toHaveBeenCalledWith('mockRouter');
-  });
-});
+    Expected: 200
+    Received: 404
