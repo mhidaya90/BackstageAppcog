@@ -1,3 +1,12 @@
-<Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} color="primary">
-  Back
-</Button>
+      <Box display="flex" alignItems="center" mb={2}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          color="primary"
+        >
+          Back
+        </Button>
+        <Box ml={2} flexGrow={1}>
+          <Header title="Bitrise Builds" subtitle="Latest build status from Bitrise" />
+        </Box>
+      </Box>
