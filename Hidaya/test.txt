@@ -1,60 +1,39 @@
-import request from 'supertest';
-import express from 'express';
-import { createRouter } from './plugin'; // Adjust the path if needed
+import {
+  coreServices,
+  createBackendPlugin,
+} from '@backstage/backend-plugin-api';
+import { createRouter } from './router';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { bitriseService } from './services/BitriseService';
 
-describe('Bitrise Router', () => {
-  let app;
-  const mockBitriseService = {
-    getBuild: jest.fn(),
-    getApps: jest.fn(),
-  };
+/**
+ * flowsourceBitrisePlugin backend plugin
+ *
+ * @public
+ */
+export const flowsourceBitrisePlugin = createBackendPlugin({
+  pluginId: 'flowsource-bitrise',
+  register(env) {
+    env.registerInit({
+      deps: {
+        logger: coreServices.logger,
+        httpRouter: coreServices.httpRouter,
+        catalog: catalogServiceRef,
+      },
+      async init({ httpRouter }) {
+        //console.log("hidaya token is ==============================>",process.env.BITRISE_AUTH_TOKEN);
+        const bitriseServiceInstance = new bitriseService(
+          process.env.BITRISE_AUTH_TOKEN!,
+        );
 
-  beforeAll(async () => {
-    const router = await createRouter({ bitriseService: mockBitriseService });
-    app = express().use(router);
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('GET /build/:appSlug should return build info', async () => {
-    const mockBuild = { id: '123', status: 'success' };
-    mockBitriseService.getBuild.mockResolvedValue(mockBuild);
-
-    const response = await request(app).get('/build/test-app');
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockBuild);
-    expect(mockBitriseService.getBuild).toHaveBeenCalledWith('test-app');
-  });
-
-  it('GET /apps should return app list', async () => {
-    const mockApps = [{ slug: 'app1', title: 'App One' }];
-    mockBitriseService.getApps.mockResolvedValue(mockApps);
-
-    const response = await request(app).get('/apps');
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockApps);
-    expect(mockBitriseService.getApps).toHaveBeenCalled();
-  });
-
-  it('GET /build/:appSlug should handle errors', async () => {
-    mockBitriseService.getBuild.mockRejectedValue(new Error('Failed to fetch build'));
-
-    const response = await request(app).get('/build/test-app');
-
-    expect(response.status).toBe(500);
-    expect(response.body).toHaveProperty('error');
-  });
-
-  it('GET /apps should handle errors', async () => {
-    mockBitriseService.getApps.mockRejectedValue(new Error('Failed to fetch apps'));
-
-    const response = await request(app).get('/apps');
-
-    expect(response.status).toBe(500);
-    expect(response.body).toHaveProperty('error');
-  });
+        httpRouter.use(
+          await createRouter({
+            bitriseService: bitriseServiceInstance,
+          }),
+        );
+      },
+    });
+  },
 });
+
+export { createRouter };
