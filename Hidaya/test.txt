@@ -3,20 +3,30 @@ import {
   createRoutableExtension,
 } from '@backstage/core-plugin-api';
 
-import { rootRouteRef } from './routes';
+import { rootRouteRef, buildsRouteRef } from './routes';
 
 export const flowsourceBitriseFrontendPlugin = createPlugin({
   id: 'flowsource-bitrise',
   routes: {
     root: rootRouteRef,
+    builds: buildsRouteRef,
   },
 });
 
-export const FlowsourceBitriseFrontendPage = flowsourceBitriseFrontendPlugin.provide(
+export const FlowsourceBitriseAppListPage = flowsourceBitriseFrontendPlugin.provide(
   createRoutableExtension({
-    name: 'FlowsourceBitriseFrontendPage',
+    name: 'FlowsourceBitriseAppListPage',
+    component: () =>
+      import('./components/BitriseAppList').then(m => m.BitriseAppList),
+    mountPoint: rootRouteRef,
+  }),
+);
+
+export const FlowsourceBitriseBuildsPage = flowsourceBitriseFrontendPlugin.provide(
+  createRoutableExtension({
+    name: 'FlowsourceBitriseBuildsPage',
     component: () =>
       import('./components/BitriseComponent').then(m => m.BitriseComponent),
-    mountPoint: rootRouteRef,
+    mountPoint: buildsRouteRef,
   }),
 );
