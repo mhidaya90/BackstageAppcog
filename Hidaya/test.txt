@@ -1,12 +1,16 @@
-      <Box display="flex" alignItems="center" mb={2}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-          color="primary"
-        >
-          Back
-        </Button>
-        <Box ml={2} flexGrow={1}>
-          <Header title="Bitrise Builds" subtitle="Latest build status from Bitrise" />
-        </Box>
-      </Box>
+<Header
+        title={
+          <Box display="flex" alignItems="center">
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate(-1)}
+              color="primary"
+              style={{ marginRight: 16 }}
+            >
+              Back
+            </Button>
+            <Typography variant="h5">Bitrise Builds</Typography>
+          </Box>
+        }
+        subtitle="Latest build status from Bitrise"
+      />
