@@ -1,26 +1,10 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+
 <Header
-        title={
-          <Box display="flex" alignItems="center">
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)}
-              color="primary"
-              style={{ marginRight: 16 }}
-            >
-              Back
-            </Button>
-            <Typography variant="h5">Bitrise Builds</Typography>
-          </Box>
-        }
-        subtitle="Latest build status from Bitrise"
-      />
-
-
-        <Header
-          title="Bitrise Builds"
-          subtitle="Latest build status from Bitrise"
-        >
-          <div style={{ position: 'absolute', right: 24 }}>
-            <AppsIcon style={{ fontSize: 28 }} />
-          </div>
-        </Header>
+  title={<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <span>Bitrise Builds</span>
+    <FontAwesomeIcon icon={faChartBar} style={{ marginLeft: 'auto' }} />
+  </div>}
+  subtitle="Latest build status from Bitrise"
+/>
