@@ -1,10 +1,28 @@
-Object literal may only specify known properties, and 'services' does not exist in type 'TestBackendOptions<any[]>'.ts(2353)
-(property) services: ({
-    service: ServiceRef<LoggerService, "plugin", "singleton">;
-    factory: () => Promise<{
-        info: jest.Mock<any, any, any>;
-        error: jest.Mock<any, any, any>;
-        warn: jest.Mock<...>;
-        debug: jest.Mock<...>;
-    }>;
-} | {
+import { startTestBackend } from '@backstage/backend-test-utils';
+import { coreServices } from '@backstage/backend-plugin-api';
+import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import { flowsourceBitrisePlugin } from './plugin';
+
+describe('flowsourceBitrisePlugin', () => {
+  it('should register and initialize the plugin correctly', async () => {
+    const mockUse = jest.fn();
+
+    await startTestBackend({
+      features: [flowsourceBitrisePlugin],
+      serviceOverrides: {
+        [coreServices.logger]: async () => ({
+          info: jest.fn(),
+          error: jest.fn(),
+          warn: jest.fn(),
+          debug: jest.fn(),
+        }),
+        [coreServices.httpRouter]: async () => ({
+          use: mockUse,
+        }),
+        [catalogServiceRef]: async () => ({}),
+      },
+    });
+
+    expect(mockUse).toHaveBeenCalled();
+  });
+});
