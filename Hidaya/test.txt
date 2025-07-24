@@ -4,3 +4,17 @@
       alt={`${app.title} logo`} 
       style={{ width: '100%', height: 'auto', marginBottom: '10px' }} 
     />
+
+
+<CardContent style={{ display: 'flex', alignItems: 'center' }}>
+            <img
+              src={app.image_url}
+              alt={`${app.title} logo`}
+              style={{ width: 60, height: 60, objectFit: 'contain', marginRight: 16 }}
+            />
+            <div>
+              <Typography variant="h6">{app.title}</Typography>
+              <Typography variant="body2">Owner: {app.repo_owner}</Typography>
+              <Typography variant="body2">Repo URL: {app.repo_url}</Typography>
+            </div>
+          </CardContent>
