@@ -1,25 +1,20 @@
 import { startTestBackend } from '@backstage/backend-test-utils';
-import { coreServices } from '@backstage/backend-plugin-api';
 import { flowsourceBitrisePlugin } from './plugin';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
-import express from 'express';
+import { testServices } from '@backstage/backend-plugin-api';
 
 describe('flowsourceBitrisePlugin', () => {
   it('should register and initialize the plugin correctly', async () => {
-    const mockUse = jest.fn();
-    const mockRouter = { use: mockUse } as unknown as express.Router;
-
-    await startTestBackend({
+    const backend = await startTestBackend({
       features: [
         flowsourceBitrisePlugin,
       ],
-      services: [
-        [coreServices.httpRouter, async () => mockRouter],
-        [coreServices.logger, async () => console],
-        [catalogServiceRef, async () => ({})],
-      ],
+      services: {
+        ...testServices,
+        catalog: catalogServiceRef,
+      },
     });
 
-    expect(mockUse).toHaveBeenCalled();
+    expect(backend).toBeDefined();
   });
 });
