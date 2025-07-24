@@ -14,3 +14,13 @@
         }
         subtitle="Latest build status from Bitrise"
       />
+
+
+        <Header
+          title="Bitrise Builds"
+          subtitle="Latest build status from Bitrise"
+        >
+          <div style={{ position: 'absolute', right: 24 }}>
+            <AppsIcon style={{ fontSize: 28 }} />
+          </div>
+        </Header>
