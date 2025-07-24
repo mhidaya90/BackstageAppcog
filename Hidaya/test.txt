@@ -1,1 +1,33 @@
- FAIL   @backstage/plugin-flowsource-bitrise-backend  plugins/flowsource-bitrise-backend/src/plugin.test.ts               ● flowsourceBitrisePlugin › should register and initialize the plugin correctly                                                                                                                                                                   expect(jest.fn()).toHaveBeenCalled()                                                                                                                                                                                                            Expected number of calls: >= 1                                                                                          Received number of calls:    0                                                                                                                                                                                                                    25 |     // flowsourceBitrisePlugin.register(env);                                                                      26 |                                                                                                                  > 27 |     expect(registerInitMock).toHaveBeenCalled();                                                                      |                              ^                                                                                     28 |                                                                                                                    29 |     const initConfig = registerInitMock.mock.calls[0][0];                                                          30 |     expect(initConfig.deps).toHaveProperty('logger');                                                                                                                                                                                      at Object.toHaveBeenCalled (plugin.test.ts:27:30)                                                                                                                                                                                          FAIL   @backstage/plugin-flowsource-bitrise-backend  plugins/flowsource-bitrise-backend/src/router.test.ts               ● Router › GET /bitrise/build/:appSlug should return build info                                                                                                                                                                                   expect(received).toBe(expected) // Object.is equality                                                                                                                                                                                           Expected: 200                                                                                                           Received: 404                                                                                                                                                                                                                                     17 |   it('GET /bitrise/build/:appSlug should return build info', async () => {                                         18 |     const response = await request(app).get('/bitrise/build/test-app');                                          > 19 |     expect(response.status).toBe(200);                                                                                |                             ^                                                                                      20 |     expect(response.body).toEqual({ id: '123', status: 'success' });                                               21 |     expect(mockBitriseService.getBuild).toHaveBeenCalledWith('test-app');                                          22 |   });                                                                                                                                                                                                                                      at Object.toBe (router.test.ts:19:29) 
+import express from 'express';
+import Router from 'express-promise-router';
+import { BitriseServiceType } from './services/BitriseService/types';
+export async function createRouter({
+bitriseService,
+}: {
+  bitriseService: BitriseServiceType;
+}): Promise<express.Router> {
+  const router = Router();
+  router.use(express.json());
+
+  router.get('/build/:appSlug', async (req, res) => {
+    try{
+      const { appSlug } = req.params;
+      const build = await bitriseService.getBuild(appSlug);
+      res.json(build);
+    }catch(error){
+      res.status(500).json({error})
+    }
+  });
+
+  router.get('/apps', async (req, res) => {
+    try{
+      const build = await bitriseService.getApps();
+      res.json(build);
+    }catch(error){
+      res.status(500).json({error})
+    }
+  });
+
+  return router;
+}
+
