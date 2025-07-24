@@ -1,33 +1,60 @@
+import request from 'supertest';
 import express from 'express';
-import Router from 'express-promise-router';
-import { BitriseServiceType } from './services/BitriseService/types';
-export async function createRouter({
-bitriseService,
-}: {
-  bitriseService: BitriseServiceType;
-}): Promise<express.Router> {
-  const router = Router();
-  router.use(express.json());
+import { createRouter } from './plugin'; // Adjust the path if needed
 
-  router.get('/build/:appSlug', async (req, res) => {
-    try{
-      const { appSlug } = req.params;
-      const build = await bitriseService.getBuild(appSlug);
-      res.json(build);
-    }catch(error){
-      res.status(500).json({error})
-    }
+describe('Bitrise Router', () => {
+  let app;
+  const mockBitriseService = {
+    getBuild: jest.fn(),
+    getApps: jest.fn(),
+  };
+
+  beforeAll(async () => {
+    const router = await createRouter({ bitriseService: mockBitriseService });
+    app = express().use(router);
   });
 
-  router.get('/apps', async (req, res) => {
-    try{
-      const build = await bitriseService.getApps();
-      res.json(build);
-    }catch(error){
-      res.status(500).json({error})
-    }
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  return router;
-}
+  it('GET /build/:appSlug should return build info', async () => {
+    const mockBuild = { id: '123', status: 'success' };
+    mockBitriseService.getBuild.mockResolvedValue(mockBuild);
 
+    const response = await request(app).get('/build/test-app');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockBuild);
+    expect(mockBitriseService.getBuild).toHaveBeenCalledWith('test-app');
+  });
+
+  it('GET /apps should return app list', async () => {
+    const mockApps = [{ slug: 'app1', title: 'App One' }];
+    mockBitriseService.getApps.mockResolvedValue(mockApps);
+
+    const response = await request(app).get('/apps');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockApps);
+    expect(mockBitriseService.getApps).toHaveBeenCalled();
+  });
+
+  it('GET /build/:appSlug should handle errors', async () => {
+    mockBitriseService.getBuild.mockRejectedValue(new Error('Failed to fetch build'));
+
+    const response = await request(app).get('/build/test-app');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty('error');
+  });
+
+  it('GET /apps should handle errors', async () => {
+    mockBitriseService.getApps.mockRejectedValue(new Error('Failed to fetch apps'));
+
+    const response = await request(app).get('/apps');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty('error');
+  });
+});
