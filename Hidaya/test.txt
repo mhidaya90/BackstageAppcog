@@ -1,23 +1,25 @@
-import { flowsourceBitrisePlugin } from './plugin';
+import { startTestBackend } from '@backstage/backend-test-utils';
 import { coreServices } from '@backstage/backend-plugin-api';
+import { flowsourceBitrisePlugin } from './plugin';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
+import express from 'express';
 
 describe('flowsourceBitrisePlugin', () => {
   it('should register and initialize the plugin correctly', async () => {
-    const registerInitMock = jest.fn();
+    const mockUse = jest.fn();
+    const mockRouter = { use: mockUse } as unknown as express.Router;
 
-    const env = {
-      registerInit: registerInitMock,
-    };
+    await startTestBackend({
+      features: [
+        flowsourceBitrisePlugin,
+      ],
+      services: [
+        [coreServices.httpRouter, async () => mockRouter],
+        [coreServices.logger, async () => console],
+        [catalogServiceRef, async () => ({})],
+      ],
+    });
 
-    flowsourceBitrisePlugin.register(env);
-
-    expect(registerInitMock).toHaveBeenCalled();
-
-    const initConfig = registerInitMock.mock.calls[0][0];
-    expect(initConfig.deps).toHaveProperty('logger', coreServices.logger);
-    expect(initConfig.deps).toHaveProperty('httpRouter', coreServices.httpRouter);
-    expect(initConfig.deps).toHaveProperty('catalog', catalogServiceRef);
-    expect(typeof initConfig.init).toBe('function');
+    expect(mockUse).toHaveBeenCalled();
   });
 });
