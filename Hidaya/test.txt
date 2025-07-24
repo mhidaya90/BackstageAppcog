@@ -1,10 +1,7 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-
 <Header
   title={<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <span>Bitrise Builds</span>
-    <FontAwesomeIcon icon={faChartBar} style={{ marginLeft: 'auto' }} />
+    <InsertChartIcon />
   </div>}
   subtitle="Latest build status from Bitrise"
 />
